@@ -1,7 +1,10 @@
 import com.cohere.api.Cohere;
 import com.cohere.api.resources.v2.requests.V2ChatRequest;
 import com.cohere.api.types.*;
+
+import java.util.HashMap;
 import java.util.List;
+import java.util.Map;
 
 import com.cohere.api.Cohere;
 
@@ -12,11 +15,50 @@ public class Main {
         String apiKey = "r4A0YoQcxKECMc4f2ipQT7PcKDqljAY8nYoLaETX";
         ChatPost chatPost = new ChatPost(apiKey);
 
-        String prompt = "Generate a simple 1-week meal plan for someone who is allergic to nuts.";
+        String prompt2 = "Generate a simple 1 day meal plan for breakfast, lunch and dinner for someone who is allergic to fish,halal.";
+        String prompt = "Generate an unnumbered unlisted only the names a breakfast meal, lunch meal and dinner meal for someone who is allergic to fish,halal.";
+
 
         String response = chatPost.getResponse(prompt);
-        System.out.println("Generated Meal Plan:");
-        System.out.println(response);
+         System.out.println("Full meal plan based on preferences: " + response);
+
+         Map<String, String> cleanedPlan = chatPost.parseSingleDayMealPlan(response);
+        System.out.println("CLEANED Meal Plan:");
+
+
+
+        for (Map.Entry<String, String> entry : cleanedPlan.entrySet()) {
+          System.out.println(entry.getKey() + ": " + entry.getValue());
+        }
+
+        Map<String, String> masterMealPlan = new HashMap<>();
+
+        // Use keys from cleanedPlan and responses from chatPost as values
+        for (Map.Entry<String, String> entry : cleanedPlan.entrySet()) {
+            String mealType = entry.getKey(); // "Breakfast", "Lunch", "Dinner"
+            String mealDescription = entry.getValue(); // cleaned description
+
+            // Get response for the meal description
+            String responses = chatPost.getResponseRecipes(mealDescription);
+
+            // Add the key (mealType) and value (response) to masterMealPlan
+            masterMealPlan.put(mealType, responses);
+        }
+        System.out.println("ACTUAL Meal Plan:");
+        for (Map.Entry<String, String> entry : masterMealPlan.entrySet()) {
+            System.out.println(entry.getKey() + ": " + entry.getValue());
+        }
+
+
+
+
+
+
+        //Map<String,String> test = chatPost.parseSingleDayMealPlan(response);
+        //System.out.println("Generated Meal Plan:");
+        //for (Map.Entry<String, String> entry : test.entrySet()) {
+          //  System.out.println(entry.getKey() + ": " + entry.getValue());
+        //}
     }
 }
 
